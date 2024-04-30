@@ -35,13 +35,23 @@
         </li>
         --->
                 {% if session.is_admin %}
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('register') }}">New user</a>
-                </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('register') }}">New user</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('users') }}">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('form_course') }}">New
+                            course</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('courses') }}">Courses</a>
+                    </li>
                 {% endif %}
             </ul>
             <div class="navbar-text ms-auto">
-                Logged as <strong>{{ session.name }} {{ session.first_name }}</strong>
+                Logged as <strong>{{ session.first_name }} {{ session.name }}</strong>
                 <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger ms-2">Logout</a>
             </div>
         </div>

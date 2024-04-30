@@ -13,6 +13,16 @@ class User(Base):
     organization_code = Column(String, nullable=True)
     admin = Column(Boolean, default=False)
 
+class Course(Base):
+    __tablename__ = 'course'
+    id = Column(Integer, primary_key=True)
+    code = Column(String)
+    organization_code = Column(String)
+    title = Column(String)
+    quadri = Column(Integer)
+    year = Column(String)
+    load_needed = Column(Integer)
+
 
 # Création de la base de données
 engine = create_engine('sqlite:///ictm-teaching.db', echo=True)

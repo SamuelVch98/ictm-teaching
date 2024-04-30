@@ -1,20 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formulaire d'inscription</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #f8f9fa;
-    }
-    .container {
-      max-width: 400px;
-      margin-top: 50px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>List of Users</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -65,34 +56,27 @@
         </div>
     </div>
 </nav>
-  <div class="container">
-    <h2 class="text-center mb-4">New user</h2>
-    <form method="post" action="{{ url_for("add_user") }}">
-      <div class="form-group">
-        <label for="email">Adresse email</label>
-        <input type="email" class="form-control" id="email" name="email" placeholder="Entrez votre adresse email">
-      </div>
-      <div class="form-group">
-        <label for="firstname">Prénom</label>
-        <input type="text" class="form-control" id="firstname" name="first_name" placeholder="Entrez votre prénom">
-      </div>
-      <div class="form-group">
-        <label for="lastname">Nom</label>
-        <input type="text" class="form-control" id="name" name="name" placeholder="Entrez votre nom">
-      </div>
-     <div class="form-group">
-    <label for="organization_code">Organization code</label>
-        <select class="form-select" id="organization_code" name="organization_code">
-            {% for code in organization_codes %}
-                <option value="{{ code }}">{{ code }}</option>
-            {% endfor %}
-        </select>
-    </div>
-      <input type="submit" value="Add">
-    </form>
-  </div>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-s9ftPkwp8Kt7sTv5yUpQnAwUxx/hdmZlpVhxAmRcxrI1vwNYmymgZb1t31cf3Zx+" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-Gcg0zY7Si34bQMQcj4RvDJB7RiJrmeiz26Ly+Qt8D4xjsHrh5zBoiyPz"></script>
+<div class="container">
+    <hr>
+    <h2>List of Courses</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Code</th>
+            <th>Title</th>
+            <th>Organizations</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for course in courses %}
+            <tr onclick="window.location='/course/{{ course.id }}';" style="cursor:pointer;">
+                <td>{{ course.code }}</td>
+                <td>{{ course.title }}</td>
+                <td>{{ code_organizations }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 </body>
 </html>

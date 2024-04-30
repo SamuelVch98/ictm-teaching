@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Course informations</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">ICTM Teaching</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('index') }}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('profile') }}">My Profile</a>
+                </li>
+                <!---
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="/" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Users Lists
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="{{ url_for('register') }}">New User</a></li>
+            </ul>
+        </li>
+        --->
+                {% if session.is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('register') }}">New user</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('users') }}">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('form_course') }}">New
+                            course</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('courses') }}">Courses</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <div class="navbar-text ms-auto">
+                Logged as <strong>{{ session.first_name }} {{ session.name }}</strong>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger ms-2">Logout</a>
+            </div>
+        </div>
+    </div>
+</nav>
+<hr>
+<div class="container bootstrap snippet">
+    <div class="row">
+        <div class="col-sm-10">
+            <h1>{{ code }} - {{ title }}</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-9">
+            <ul class="nav nav-tabs">
+                {% for c in course %}
+                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab"
+                                            href="#{{ c.id }}">{{ c.year }}</a></li>
+                {% endfor %}
+            </ul>
+            <div class="tab-content">
+                {% set ns = namespace(course_found = false) %}
+                {% for c in course if ns.course_found == false %}
+                    <div class="tab-pane active" id="{{ c.id }}">
+                        <h2>Course informations</h2>
+                        <form class="form" action="{{ url_for('update_course_info') }}" method="post"
+                              id="courseInfo">
+                            <input type="hidden" name="course_id" value="{{ c.id }}">
+                            <div class="form-group">
+                                <div class="col-xs-6">
+                                    <br>
+                                    <label for="code"><h4>Code</h4></label>
+                                    <input type="text" class="form-control" name="code" id="code"
+                                           placeholder="Code" value="{{ c.code }}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-6">
+                                    <br>
+                                    <label for="title"><h4>Title</h4></label>
+                                    <input type="text" class="form-control" name="title" id="title"
+                                           placeholder="Title"
+                                           value="{{ c.title }}">
+                                </div>
+                            </div>
+                            <br>
+                            <div class="form-group">
+                                <label for="quadri"><h4>Quadri</h4></label>
+                                <select class="form-select" id="quadri" name="quadri">
+                                    {% for q in quadri %}
+                                        {% if q == c.quadri %}
+                                            <option value="{{ q }}" selected>{{ q }}</option>
+                                        {% else %}
+                                            <option value="{{ q }}">{{ q }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <br>
+                            <div class="form-group">
+                                <label for="year"><h4>Year</h4></label>
+                                <select class="form-select" id="year" name="year">
+                                    {% for y in year %}
+                                        {% if y == c.year %}
+                                            <option value="{{ y }}" selected>{{ y }}</option>
+                                        {% else %}
+                                            <option value="{{ y }}">{{ y }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <br>
+                            <div class="form-group">
+                                <div class="col-xs-6">
+                                    <label for="load_needed"><h4>Load Needed</h4></label>
+                                    <input type="text" class="form-control" name="load_needed" id="load_needed"
+                                           value="{{ c.load_needed }}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <br>
+                                    <button class="btn btn-lg btn-success" type="submit"><i
+                                            class="glyphicon glyphicon-ok-sign"></i> Save
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <hr>
+                    </div>
+                    <div class="tab-pane" id="preferences">
+                        <h2>Preferences for next year</h2>
+                        <hr>
+                    </div>
+                    {% set ns.course_found = true %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

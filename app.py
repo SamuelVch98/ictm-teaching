@@ -3,7 +3,7 @@ from functools import wraps
 from flask import Flask, render_template, redirect, session, request, url_for, make_response, flash
 from sqlalchemy.sql.functions import current_user
 
-from db import User, Session
+from db import User, Session, Course
 
 import auth
 from auth import auth_bp
@@ -24,8 +24,10 @@ except Exception as e:
 # Core blueprints
 app.register_blueprint(auth_bp, url_prefix="/auth")
 
-# Organization codes
+# List from config.json
 organization_codes = app.config.get('organization_codes', [])
+quadri = app.config.get('quadri', [])
+year = app.config.get('year', [])
 
 
 # Decorators
@@ -142,7 +144,7 @@ def update_user_profile():
         organization_code = request.form['organization_code']
 
         db_session = Session()
-        user = db_session.query(User).filter(User.email == email).first()
+        user = db_session.query(User).filter(User.id == user_id).first()
         if user:
             try:
                 user.first_name = first_name
@@ -157,6 +159,86 @@ def update_user_profile():
             flash('User not found', 'danger')
     else:
         return make_response("Problem with form request", 500)
+
+@app.route('/form_course')
+@login_required
+def form_course():
+    return render_template('add_course.html', year=year, quadri=quadri)
+
+@app.route('/add_course', methods=['POST'])
+@login_required
+def add_course():
+    form = request.form
+    if form:
+        code = request.form['code']
+        title = request.form['title']
+        quadri = request.form['quadri']
+        year = request.form['year']
+        load_needed = request.form['load_needed']
+
+        db_session = Session()
+        try:
+            new_course = Course(code=code, title=title, quadri=quadri, year=year, load_needed=load_needed)
+            db_session.add(new_course)
+            db_session.commit()
+        except:
+            db_session.rollback()
+            raise
+        return redirect(url_for("form_course"))
+
+@app.route('/courses')
+@login_required
+def courses():
+    db_session = Session()
+    all_courses = db_session.query(Course).all()
+    unique_courses = {}
+    for course in all_courses:
+        unique_courses[course.code] = course
+    unique_courses = list(unique_courses.values())
+    return render_template('courses.html', courses=unique_courses)
+
+@app.route('/course/<int:course_id>')
+@login_required
+def course_info(course_id):
+    db_session = Session()
+    my_course = db_session.query(Course).filter_by(id=course_id).first()
+    course_by_code = db_session.query(Course).filter_by(code=my_course.code).all()
+    if my_course:
+        return render_template('course_info.html', course=course_by_code, code=my_course.code, title=my_course.title, quadri=quadri, year=year)
+    else:
+        return make_response("The user is not found", 500)
+
+
+@app.route('/update_course_info', methods=['POST'])
+@login_required
+def update_course_info():
+    form = request.form
+    if form:
+        course_id = request.form['course_id']
+        code = request.form['code']
+        title = request.form['title']
+        quadri = request.form['quadri']
+        year = request.form['year']
+        load_needed = request.form['load_needed']
+
+        db_session = Session()
+        course = db_session.query(Course).filter(Course.id == course_id).first()
+        if course:
+            try:
+                course.code = code
+                course.title = title
+                course.quadri = quadri
+                course.year = year
+                course.load_needed = load_needed
+                db_session.commit()
+            except Exception as e:
+                db_session.rollback()
+            return redirect(url_for("course_info", course_id=course_id))
+        else:
+            flash('Course not found', 'danger')
+    else:
+        return make_response("Problem with form request", 500)
+
 
 
 if __name__ == '__main__':
