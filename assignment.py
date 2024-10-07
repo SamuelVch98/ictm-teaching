@@ -1,6 +1,8 @@
-from decorators import login_required
-from db import db, User, Course, PreferenceAssignment, Teacher, Researcher, Organization, PublishAssignment, \
-    ResearcherSupervisor
+from sqlalchemy import func
+
+from decorators import login_required, check_access_level
+from db import db, User, Course, PreferenceAssignment, Teacher, Researcher, Organization, PublishAssignment, Role, \
+     ResearcherSupervisor
 from flask import Blueprint, render_template, flash, current_app, url_for, request, make_response, redirect, session, \
     Flask, jsonify
 from util import get_current_year
@@ -10,6 +12,7 @@ assignment_bp = Blueprint('assignment', __name__)
 
 @assignment_bp.route('/assignments', methods=['GET'])
 @login_required
+@check_access_level(Role.ADMIN)
 def assignments():
     return render_template('assignment.html')
 
@@ -21,6 +24,7 @@ def serialize_model(model):
 
 @assignment_bp.route('/load_data', methods=['GET'])
 @login_required
+@check_access_level(Role.ADMIN)
 def load_data():
     current_year = get_current_year()
     courses = (db.session.query(Course).filter_by(year=current_year).order_by(Course.quadri).all())
@@ -47,6 +51,7 @@ def load_data():
 
 @assignment_bp.route('/publish_assignments', methods=['POST'])
 @login_required
+@check_access_level(Role.ADMIN)
 def publish_assignments():
     data = request.get_json()
     if not data:
@@ -72,3 +77,26 @@ def publish_assignments():
             db.session.commit()
 
     return jsonify({"message": "Assignments published successfully"}), 200
+
+
+
+def count_course_assignments():
+    # Counts the number of times each user has taught each course
+    assignment_counts = db.session.query(
+        PublishAssignment.user_id,
+        PublishAssignment.course_id,
+        func.count(PublishAssignment.course_id).label('count')
+    ).group_by(
+        PublishAssignment.user_id,
+        PublishAssignment.course_id
+    ).all()
+
+    return assignment_counts
+
+
+@assignment_bp.route('/course_assignments_count', methods=['GET'])
+@login_required
+@check_access_level(Role.ADMIN)
+def get_course_assignments_count():
+    results = count_course_assignments()
+    return jsonify(results=[{'user_id': user_id, 'course_id': course_id, 'count': count} for user_id, course_id, count in results])

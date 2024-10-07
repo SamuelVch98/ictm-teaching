@@ -60,7 +60,6 @@ fetch('/assignment/load_data')
                 });
                 rows.push(row);
             }
-
             return rows;
         }
 
@@ -184,6 +183,15 @@ fetch('/assignment/load_data')
             localStorage.clear();
         }
 
+        function getCountCourseAssignment() {
+            return fetch('/assignment/course_assignments_count')
+                .then(response => response.json())
+                .then(data => {
+                    return data.results;
+                })
+                .catch(error => console.log(error))
+        }
+
         // Verify if the table is modified locally
         retrieveDataLocally();
         let comments = retrieveCellsMetaLocally();
@@ -283,11 +291,35 @@ fetch('/assignment/load_data')
                     storeCellsMeta(comments);
                 }
             },
-            afterRenderer: function (TD, row, col, prop, value, cellProperties) {
+            afterRenderer: async function (TD, row, col, prop, value, cellProperties) {
                 if ((col >= lenFixedHeaders && row >= lenFixedRowsText) && (row % 2 === 1) && (value !== '')) {
                     TD.style.fontWeight = 'bold'; // Bold text
                     TD.style.textAlign = 'left'; // Left alignment
                 }
+
+                if (row >= lenFixedRowsText && col >= lenFixedHeaders && (row % 2 === 0)) {
+                    const assignmentCount = await getCountCourseAssignment();
+
+                    console.log("Assignment count", assignmentCount);
+
+                    const user_id = this.getDataAtRowProp(row, 'researchers.id'); // Retrieves user ID
+                    const course_id = this.getDataAtCol(col)[0]; // Retrieves the course ID
+
+                    const assignment = assignmentCount.find(item => item.user_id === user_id && item.course_id === course_id);
+
+                    if (assignment) {
+                        // Coloration basée sur le nombre d'affectations
+                        const count = assignment.count;
+                        if (count === 1) {
+                            TD.style.backgroundColor = '#5DADE2';
+                        } else if (count === 2) {
+                            TD.style.backgroundColor = '#87CEEB';
+                        } else if (count >= 3) {
+                            TD.style.backgroundColor = '#0A74DA';
+                        }
+                    }
+                }
+
                 //(row%2) === 1 to avoid empty lines
                 if (row >= lenFixedRowsText && (row % 2) === 0 && col < lenFixedHeaders) {
                     const rowValue = this.getDataAtRow(row);
@@ -390,6 +422,7 @@ fetch('/assignment/load_data')
                     return cellProperties;
                 }
             });
+
             function updateToastContent(message) {
                 let toastBody = document.querySelector('#toast-notification .toast-body');
                 toastBody.textContent = message;
