@@ -83,7 +83,6 @@ fetch('/assignment/load_data')
                 const row = buildRow(user, true);
                 //The second line allows admins to assign a course to the user
                 const emptyRow = buildRow(user, false);
-                //const matchingAssistant = researchers[user.id];
                 const assistantOrg = organizations[user.organization_id];
 
                 let researcherSupervisor = Object.values(supervisors).filter(supervisor => supervisor.researcher_id === researcher.id);
@@ -123,7 +122,6 @@ fetch('/assignment/load_data')
 
         const fixedRows = fixedRowsData();
         const userRows = userRowsData();
-
 
         function getCourseColumns() {
             const fixedColumns = [
