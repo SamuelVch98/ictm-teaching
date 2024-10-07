@@ -243,6 +243,7 @@ fetch('/assignment/load_data')
                 if (changes) {
                     changes.forEach(([row, prop, oldValue, newValue]) => {
                         let col = this.propToCol(prop);
+                        // Row % 2 === 1 corresponds to the row of assignments for admins
                         if ((col >= lenFixedHeaders && row >= lenFixedRowsText) && (row % 2 === 1)) {
 
                             const colInfos = this.getDataAtProp(prop);
