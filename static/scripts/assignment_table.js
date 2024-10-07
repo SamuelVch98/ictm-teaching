@@ -288,11 +288,6 @@ fetch('/assignment/load_data')
                     TD.style.fontWeight = 'bold'; // Bold text
                     TD.style.textAlign = 'left'; // Left alignment
                 }
-                //Style first col if needed
-                if (col === 0 && row < lenFixedRowsText) {
-                    TD.style.fontWeight = 'bold';
-                    TD.style.textAlign = 'left';
-                }
                 //(row%2) === 1 to avoid empty lines
                 if (row >= lenFixedRowsText && (row % 2) === 0 && col < lenFixedHeaders) {
                     const rowValue = this.getDataAtRow(row);
