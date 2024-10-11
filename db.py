@@ -181,6 +181,7 @@ class PublishAssignment(db.Model):
     load_q1 = db.Column(db.Integer)
     load_q2 = db.Column(db.Integer)
     position = db.Column(db.Integer)
+    teacher_publication = db.Column(db.Boolean, default=False)
 
     __table_args__ = (
         db.ForeignKeyConstraint(

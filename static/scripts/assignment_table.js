@@ -433,7 +433,9 @@ fetch('/assignment/load_data')
                     location.reload();
                 }, 1500);
             })
-            $('#button-publish-assignments').click(async function () {
+
+            async function handlePublish(publicationType) {
+                const teacherPublication = (publicationType === 'teacher');
                 const slicedData = data.slice(lenFixedRowsText);
                 const result = [];
 
@@ -445,6 +447,65 @@ fetch('/assignment/load_data')
                         user_id: user_row.researchers.id,
                         load_q1: user_row.loadQ1,
                         load_q2: user_row.loadQ2,
+                        teacher_publication: teacherPublication,
+                    };
+
+                    const courseData = {};
+                    courses.forEach(course => {
+                        if (course_row[course.code] !== '') {
+                            courseData[course.id] = course_row[course.code];
+                        }
+                    })
+                    result.push({userData, courseData});
+                }
+
+                try {
+                    const response = await fetch('/assignment/publish_assignments', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(result),
+                    });
+
+                    if (response.ok) {
+                        updateToastContent('Assignments published');
+                        toastNotification.show();
+                    } else {
+                        updateToastContent('Failed to publish assignments' + response.statusText);
+                        toastNotification.show();
+                    }
+                } catch (error) {
+                    updateToastContent('Error: ' + error);
+                    toastNotification.show();
+                }
+            }
+
+            $('#button-publish-teachers').click(function () {
+                handlePublish('teacher'); // Pour les enseignants
+            });
+
+            $('#button-publish-everyone').click(function () {
+                handlePublish('everyone'); // Pour tout le monde
+            });
+
+            /*
+            $('#button-publish-assignments').click(async function () {
+                const publicationType = $(this).data('publication');
+                const teacherPublication = (publicationType === 'teacher');
+
+                const slicedData = data.slice(lenFixedRowsText);
+                const result = [];
+
+                for (let i = 0; i < slicedData.length; i += 2) {
+                    const user_row = slicedData[i];
+                    const course_row = slicedData[i + 1];
+
+                    const userData = {
+                        user_id: user_row.researchers.id,
+                        load_q1: user_row.loadQ1,
+                        load_q2: user_row.loadQ2,
+                        teacher_publication: teacherPublication,
                     };
 
                     const courseData = {};
@@ -477,6 +538,7 @@ fetch('/assignment/load_data')
                     toastNotification.show();
                 }
             });
+             */
         });
     });
 

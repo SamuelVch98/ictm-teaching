@@ -8,7 +8,7 @@ from course import course_bp
 from config import config_bp
 from course_preference import course_preference_bp
 from assignment import assignment_bp
-from db import db, Configuration, Organization, User, Course, Teacher, Researcher
+from db import db, Configuration, Organization, User, Course, Teacher, Researcher, PublishAssignment
 from decorators import *
 from flask import Flask, render_template, session, request
 from enums import *
@@ -56,8 +56,17 @@ def inject_configurations():
 def index():  # put application's code here
     current_year = get_current_year()
     user = db.session.query(User).filter_by(email=session['email']).first()
-    courses_teacher = db.session.query(Course).filter_by(year=current_year).join(Teacher).filter(Teacher.user_id == user.id).all()
-    return render_template("home.html", user=user, courses=courses_teacher)
+    researcher = db.session.query(Researcher).filter_by(user_id=user.id).first()
+
+    courses_teacher = db.session.query(Course).join(Teacher).filter(Teacher.user_id == user.id).all()
+    courses_researcher = db.session.query(Course).join(PublishAssignment).filter(PublishAssignment.user_id == user.id,
+                                                                                 PublishAssignment.course_year == current_year)
+    if researcher:
+        courses_researcher = courses_researcher.filter(PublishAssignment.teacher_publication == False).all()
+    else:
+        courses_researcher = courses_researcher.all()
+
+    return render_template("home.html", user=user, courses=courses_teacher, courses_researcher=courses_researcher)
 
 
 if __name__ == '__main__':

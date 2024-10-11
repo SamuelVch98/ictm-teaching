@@ -64,7 +64,7 @@ def publish_assignments():
                     assignment = PublishAssignment(course_id=id, course_year=current_year,
                                                    user_id=user_data.get('user_id'),
                                                    load_q1=user_data.get('load_q1'), load_q2=user_data.get('load_q2'),
-                                                   position=pos)
+                                                   position=pos, teacher_publication=user_data.get('teacher_publication'))
                     db.session.add(assignment)
                 except Exception as e:
                     return jsonify({"error": str(e)}), 400
