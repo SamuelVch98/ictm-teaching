@@ -49,10 +49,14 @@ def load_data():
 @login_required
 def publish_assignments():
     data = request.get_json()
+    teacher_publication = data.get('teacher_publication')
     if not data:
         return jsonify({"error": "No data provided"}), 400
 
     current_year = get_current_year()
+
+    published_assignment = db.session.add(PublishAssignment(is_teacher_publication=teacher_publication))
+    db.session.commit()
 
     for item in data:
         user_data = item.get('userData')
@@ -64,7 +68,7 @@ def publish_assignments():
                     assignment = PublishAssignment(course_id=id, course_year=current_year,
                                                    user_id=user_data.get('user_id'),
                                                    load_q1=user_data.get('load_q1'), load_q2=user_data.get('load_q2'),
-                                                   position=pos, teacher_publication=user_data.get('teacher_publication'))
+                                                   position=pos, publish_assignment_id=published_assignment.id)
                     db.session.add(assignment)
                 except Exception as e:
                     return jsonify({"error": str(e)}), 400

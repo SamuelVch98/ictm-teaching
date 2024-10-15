@@ -107,11 +107,10 @@ fetch('/assignment/load_data')
 
                 const userPrefs = Object.values(preferences).filter(pref => pref.researcher_id === researcher.id);
 
-                let pos = 1;
                 courses.forEach(course => {
                     const isPref = userPrefs.find(pref => pref.course_id === course.id);
                     const code = course.code;
-                    row[code] = isPref ? pos++ : "";
+                    row[code] = isPref ? isPref['rank'] : "";
                     emptyRow[code] = "";
                 });
 
@@ -447,7 +446,6 @@ fetch('/assignment/load_data')
                         user_id: user_row.researchers.id,
                         load_q1: user_row.loadQ1,
                         load_q2: user_row.loadQ2,
-                        teacher_publication: teacherPublication,
                     };
 
                     const courseData = {};
@@ -465,7 +463,7 @@ fetch('/assignment/load_data')
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(result),
+                        body: JSON.stringify({data: result, teacher_publication: teacherPublication})
                     });
 
                     if (response.ok) {

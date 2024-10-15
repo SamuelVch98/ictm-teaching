@@ -6,7 +6,6 @@ from db import User, Configuration, Organization
 
 def create_database(name, first_name, email):
     with app.app_context():
-        db.create_all()
         add_first_admin(name, first_name, email)
         initialize_configuration()
         create_organizations()

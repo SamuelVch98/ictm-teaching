@@ -59,13 +59,14 @@ def index():  # put application's code here
     researcher = db.session.query(Researcher).filter_by(user_id=user.id).first()
 
     courses_teacher = db.session.query(Course).join(Teacher).filter(Teacher.user_id == user.id).all()
-    courses_researcher = db.session.query(Course).join(PublishAssignment).filter(PublishAssignment.user_id == user.id,
-                                                                                 PublishAssignment.course_year == current_year)
+    courses_researcher = db.session.query(PublishAssignment).order_by(PublishAssignment.id.desc()).first()
+
+    '''
     if researcher:
-        courses_researcher = courses_researcher.filter(PublishAssignment.teacher_publication == False).all()
+        courses_researcher = courses_researcher.filter(PublishAssignment.is_teacher_publication == False).all()
     else:
         courses_researcher = courses_researcher.all()
-
+    '''
     return render_template("home.html", user=user, courses=courses_teacher, courses_researcher=courses_researcher)
 
 
