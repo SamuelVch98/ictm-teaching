@@ -1,6 +1,6 @@
 from decorators import login_required
 from db import db, User, Course, PreferenceAssignment, Teacher, Researcher, Organization, PublishAssignment, \
-    ResearcherSupervisor
+    PublishAssignmentLine, ResearcherSupervisor
 from flask import Blueprint, render_template, flash, current_app, url_for, request, make_response, redirect, session, \
     Flask, jsonify
 from util import get_current_year
@@ -48,24 +48,26 @@ def load_data():
 @assignment_bp.route('/publish_assignments', methods=['POST'])
 @login_required
 def publish_assignments():
+    current_year = get_current_year()
     data = request.get_json()
-    teacher_publication = data.get('teacher_publication')
+    assignment_lines = data.get('assignment_lines')
+
     if not data:
         return jsonify({"error": "No data provided"}), 400
 
-    current_year = get_current_year()
-
-    published_assignment = db.session.add(PublishAssignment(is_teacher_publication=teacher_publication))
+    teacher_publication = data.get('teacher_publication')
+    published_assignment = PublishAssignment(is_teacher_publication=teacher_publication)
+    db.session.add(published_assignment)
     db.session.commit()
 
-    for item in data:
+    for item in assignment_lines:
         user_data = item.get('userData')
         course_data = item.get('courseData')
 
         if course_data and user_data:
             for id, pos in course_data.items():
                 try:
-                    assignment = PublishAssignment(course_id=id, course_year=current_year,
+                    assignment = PublishAssignmentLine(course_id=id, course_year=current_year,
                                                    user_id=user_data.get('user_id'),
                                                    load_q1=user_data.get('load_q1'), load_q2=user_data.get('load_q2'),
                                                    position=pos, publish_assignment_id=published_assignment.id)

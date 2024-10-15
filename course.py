@@ -104,7 +104,7 @@ def add_course():
 
         db.session.add(new_course)
         db.session.commit()
-        return redirect(url_for("course.courses", current_year=year))
+        return redirect(url_for("course.courses", year=year))
     except Exception as e:
         db.session.rollback()
         raise e
@@ -115,7 +115,7 @@ def add_course():
 @check_access_level(Role.ADMIN)
 def courses(year):
     courses = db.session.query(Course).filter_by(year=year).all()
-    return render_template('courses.html', courses=courses, current_year=year)
+    return render_template('courses.html', courses=courses, year=year)
 
 
 @course_bp.route('/search_teachers')

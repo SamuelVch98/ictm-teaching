@@ -8,7 +8,8 @@ from course import course_bp
 from config import config_bp
 from course_preference import course_preference_bp
 from assignment import assignment_bp
-from db import db, Configuration, Organization, User, Course, Teacher, Researcher, PublishAssignment
+from db import db, Configuration, Organization, User, Course, Teacher, Researcher, PublishAssignment, \
+    PublishAssignmentLine
 from decorators import *
 from flask import Flask, render_template, session, request
 from enums import *
@@ -53,20 +54,33 @@ def inject_configurations():
 # Routes
 @app.route('/')
 @login_required
-def index():  # put application's code here
-    current_year = get_current_year()
+def index():
     user = db.session.query(User).filter_by(email=session['email']).first()
     researcher = db.session.query(Researcher).filter_by(user_id=user.id).first()
-
     courses_teacher = db.session.query(Course).join(Teacher).filter(Teacher.user_id == user.id).all()
-    courses_researcher = db.session.query(PublishAssignment).order_by(PublishAssignment.id.desc()).first()
 
-    '''
+    latest_assignment = db.session.query(PublishAssignment).order_by(PublishAssignment.id.desc()).first()
+
+    researcher_courses = []
+    courses_researcher = []
+
+    if user.is_teacher:
+        latest_publication = db.session.query(PublishAssignment).order_by(PublishAssignment.id.desc()).first()
+
+        if latest_publication:
+            supervised_researchers = db.session.query(PublishAssignmentLine).join(Researcher).filter(
+                Researcher.supervisor_id == user.id,
+                PublishAssignmentLine.publish_assignment_id == latest_publication.id
+            ).all()
+            courses_teacher = [assignment for assignment in supervised_researchers]
+
     if researcher:
-        courses_researcher = courses_researcher.filter(PublishAssignment.is_teacher_publication == False).all()
-    else:
-        courses_researcher = courses_researcher.all()
-    '''
+        latest_assignment = db.session.query(PublishAssignment).order_by(PublishAssignment.id.desc()).first()
+
+        if latest_assignment and not latest_assignment.teacher_publication:
+            courses_researcher = latest_assignment.publish_assignment_lines
+
+
     return render_template("home.html", user=user, courses=courses_teacher, courses_researcher=courses_researcher)
 
 

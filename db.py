@@ -184,9 +184,10 @@ class PublishAssignment(db.Model):
 
 class PublishAssignmentLine(db.Model):
     __tablename__ = 'publish_assignment_line'
-    course_id = db.Column(db.Integer, primary_key=True)
-    course_year = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    course_id = db.Column(db.Integer, nullable=False)
+    course_year = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     load_q1 = db.Column(db.Integer)
     load_q2 = db.Column(db.Integer)
     position = db.Column(db.Integer)

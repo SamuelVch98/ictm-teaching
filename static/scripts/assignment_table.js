@@ -456,14 +456,14 @@ fetch('/assignment/load_data')
                     })
                     result.push({userData, courseData});
                 }
-
+                //teacher_publication: teacherPublication
                 try {
                     const response = await fetch('/assignment/publish_assignments', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({data: result, teacher_publication: teacherPublication})
+                        body: JSON.stringify({assignment_lines: result, teacher_publication: teacherPublication})
                     });
 
                     if (response.ok) {
