@@ -109,7 +109,7 @@ fetch('/assignment/load_data')
                 courses.forEach(course => {
                     const isPref = userPrefs.find(pref => pref.course_id === course.id);
                     const code = course.code;
-                    row[code] = isPref ? pos++ : "";
+                    row[code] = isPref ? isPref["rank"] : "";
                     emptyRow[code] = "";
                 });
 

@@ -32,7 +32,8 @@ def load_data():
     supervisors = db.session.query(ResearcherSupervisor).all()
     teachers = db.session.query(Teacher).filter_by(course_year=current_year).all()
     researchers = db.session.query(Researcher).all()
-    preferences = db.session.query(PreferenceAssignment).filter_by(course_year=current_year).all()
+    preferences = (db.session.query(PreferenceAssignment).filter_by(course_year=current_year)
+                   .order_by(PreferenceAssignment.rank.asc()).all())
     organizations = db.session.query(Organization).all()
 
     data = {
