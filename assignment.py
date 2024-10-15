@@ -80,17 +80,17 @@ def publish_assignments():
     return jsonify({"message": "Assignments published successfully"}), 200
 
 
-
 def count_course_assignments():
     # Counts the number of times each user has taught each course
-    assignment_counts = db.session.query(
+    current_year = get_current_year()
+    assignment_counts = (db.session.query(
         PublishAssignment.user_id,
         PublishAssignment.course_id,
         func.count(PublishAssignment.course_id).label('count')
-    ).group_by(
+    ).filter(PublishAssignment.course_year < current_year).group_by(
         PublishAssignment.user_id,
         PublishAssignment.course_id
-    ).all()
+    ).distinct().all())
 
     return assignment_counts
 
@@ -100,4 +100,5 @@ def count_course_assignments():
 @check_access_level(Role.ADMIN)
 def get_course_assignments_count():
     results = count_course_assignments()
-    return jsonify(results=[{'user_id': user_id, 'course_id': course_id, 'count': count} for user_id, course_id, count in results])
+    return jsonify(
+        results=[{'user_id': user_id, 'course_id': course_id, 'count': count} for user_id, course_id, count in results])

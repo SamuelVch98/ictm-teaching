@@ -109,7 +109,7 @@ fetch('/assignment/load_data')
                 courses.forEach(course => {
                     const isPref = userPrefs.find(pref => pref.course_id === course.id);
                     const code = course.code;
-                    row[code] = isPref ? isPref["rank"] : "";
+                    row[code] = isPref ? isPref['rank'] : "";
                     emptyRow[code] = "";
                 });
 
@@ -311,9 +311,9 @@ fetch('/assignment/load_data')
                         // Coloration basée sur le nombre d'affectations
                         const count = assignment.count;
                         if (count === 1) {
-                            TD.style.backgroundColor = '#5DADE2';
-                        } else if (count === 2) {
                             TD.style.backgroundColor = '#87CEEB';
+                        } else if (count === 2) {
+                            TD.style.backgroundColor = '#5DADE2';
                         } else if (count >= 3) {
                             TD.style.backgroundColor = '#0A74DA';
                         }
