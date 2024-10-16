@@ -55,33 +55,42 @@ def inject_configurations():
 @app.route('/')
 @login_required
 def index():
+    current_year = get_current_year()
     user = db.session.query(User).filter_by(email=session['email']).first()
     researcher = db.session.query(Researcher).filter_by(user_id=user.id).first()
-    courses_teacher = db.session.query(Course).join(Teacher).filter(Teacher.user_id == user.id).all()
+    courses_teacher = db.session.query(Course).join(Teacher).filter(Teacher.user_id == user.id,
+                                                                    Course.year == current_year).all()
 
     latest_assignment = db.session.query(PublishAssignment).order_by(PublishAssignment.id.desc()).first()
+    assistants = db.session.query(User).join(PublishAssignmentLine).filter(
+        PublishAssignmentLine.publish_assignment_id == latest_assignment.id,
+        db.and_(
+            PublishAssignmentLine.course_id.in_([course.id for course in courses_teacher]),
+            PublishAssignmentLine.course_year == current_year
+        )
+    ).all()
 
-    researcher_courses = []
-    courses_researcher = []
+
+    teacher_assignments = []
+    researcher_assignments = []
 
     if user.is_teacher:
-        latest_publication = db.session.query(PublishAssignment).order_by(PublishAssignment.id.desc()).first()
+        supervised_researchers = user.supervisees
 
-        if latest_publication:
-            supervised_researchers = db.session.query(PublishAssignmentLine).join(Researcher).filter(
-                Researcher.supervisor_id == user.id,
-                PublishAssignmentLine.publish_assignment_id == latest_publication.id
-            ).all()
-            courses_teacher = [assignment for assignment in supervised_researchers]
+        teacher_assignments = db.session.query(PublishAssignmentLine).filter(
+            PublishAssignmentLine.user_id.in_([user.id for user in supervised_researchers]),
+            PublishAssignmentLine.publish_assignment_id == latest_assignment.id
+        ).all()
 
     if researcher:
-        latest_assignment = db.session.query(PublishAssignment).order_by(PublishAssignment.id.desc()).first()
+        if not latest_assignment.is_teacher_publication:
+            researcher_assignments = db.session.query(PublishAssignmentLine).filter(
+                PublishAssignmentLine.user_id == user.id,
+                PublishAssignmentLine.publish_assignment_id == latest_assignment.id
+            ).order_by(PublishAssignmentLine.position.asc()).all()
 
-        if latest_assignment and not latest_assignment.teacher_publication:
-            courses_researcher = latest_assignment.publish_assignment_lines
-
-
-    return render_template("home.html", user=user, courses=courses_teacher, courses_researcher=courses_researcher)
+    return render_template("home.html", user=user, courses=courses_teacher, teacher_assignments=teacher_assignments,
+                           assistants=assistants, researcher_assignments=researcher_assignments)
 
 
 if __name__ == '__main__':

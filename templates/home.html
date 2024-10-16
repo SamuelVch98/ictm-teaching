@@ -10,14 +10,17 @@
         <table class="table table-hover">
             <thead>
             <tr>
-                <th>Code</th>
-                <th>Title</th>
+                <th>Course</th>
+                <th>Position</th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td colspan="2">No courses assigned this year.</td>
-            </tr>
+                {% for researcher_course in researcher_assignments %}
+                    <tr>
+                        <td>{{ researcher_course.course.code }} - {{ researcher_course.course.title }}</td>
+                        <td>{{ researcher_course.position }}</td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
         <div class="container-fluid">
@@ -78,7 +81,11 @@
                 <tr>
                     <td>{{ course.code }}</td>
                     <td>{{ course.title }}</td>
-                    <td>None</td>
+                    <td>
+                        {% for assistant in assistants %}
+                            {{ assistant.name }} {{ assistant.first_name }}<br>
+                        {% endfor %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -92,9 +99,12 @@
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td colspan="2">No course(s) this year.</td>
-            </tr>
+            {% for researcher_course in teacher_assignments %}
+                <tr>
+                    <td>{{ researcher_course.course.code }} - {{ researcher_course.course.title }}</td>
+                    <td>{{ researcher_course.user.name }} {{ researcher_course.user.first_name }}</td>
+                </tr>
+            {% endfor %}
             </tbody>
         </table>
     {% endif %}

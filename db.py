@@ -200,6 +200,9 @@ class PublishAssignmentLine(db.Model):
         ),
     )
 
+    user = db.relationship('User', backref=db.backref('user_publish_assignment_line', lazy=True))
+    course = db.relationship('Course', backref=db.backref('course_publish_assignment_line', lazy=True))
+
 
 class Evaluation(db.Model):
     __tablename__ = 'evaluation'
