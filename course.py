@@ -172,7 +172,7 @@ def update_course_info():
     organisation_code = request.form.getlist('organization_code[]')
     if not len(organisation_code):
         flash("Please select at least one organization", "danger")
-        return redirect(url_for('course.course_info', course_id=course_id))
+        return redirect(url_for('course.course_info', course_id=course_id, year=year))
 
     course = db.session.query(Course).filter(Course.id == course_id, Course.year == year).first()
     if not course:
