@@ -125,7 +125,8 @@ def search_teachers():
     if not validate_string_pattern(search_term):
         return make_response("Invalid search term", 400)
 
-    teachers = db.session.query(User).join(Teacher).filter(
+    teachers = db.session.query(User).filter(
+        User.is_teacher,
         User.active == True,
         User.name.ilike(f'%{search_term}%')
     ).all()
@@ -144,7 +145,7 @@ def course_info(course_id, year):
     all_years = db.session.query(Course).filter_by(id=course.id).distinct(Course.year).order_by(
         Course.year.desc()).all()
 
-    evaluations = db.session.query(Evaluation).filter(Evaluation.course_id == course_id)
+    evaluations = course.evaluations
 
     return render_template('course_info.html', course=course, all_years=all_years, current_year=year,
                            evaluations=evaluations)
@@ -271,12 +272,22 @@ def course_evaluation(evaluation_id):
     evaluation = db.session.query(Evaluation).get(evaluation_id)
     courses = db.session.query(Course).filter_by(year=evaluation.course_year).all()
 
+    course = evaluation.course
+    user = db.session.query(User).filter_by(id=session['user_id']).first()
+    teachers = course.course_teacher
+
+    # Accessible only to the admin, the evaluation creator and the course teachers
+    if (not user.is_admin) and (user.id != evaluation.user_id) and (user.id not in [teacher.user_id for teacher in teachers]):
+        flash("You are not allowed to access this page", "danger")
+        return redirect(url_for('course.courses', course_id=course.id, year=course.year))
+
     return render_template('evaluations.html', evaluation=evaluation, current_year=evaluation.course_year,
                            courses=courses)
 
 
 @course_bp.route('/evaluations/<int:user_id>/<int:current_year>')
 @login_required
+@check_access_level(Role.RESEARCHER)
 def user_evaluation(user_id, current_year):
     courses = db.session.query(Course).filter_by(year=current_year).all()
 
@@ -321,4 +332,4 @@ def create_evaluation(user_id, current_year):
         db.session.rollback()
         flash(f'An error occurred: {str(e)}', 'danger')
 
-    return redirect(url_for('course.evaluations', user_id=user_id, current_year=current_year))
+    return redirect(url_for('course.user_evaluation', user_id=user_id, current_year=current_year))
