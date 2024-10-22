@@ -147,29 +147,6 @@
                 </form>
             </div>
         </div>
-        <br>
-        {% if researcher %}
-            <h2>Preferences for next year</h2>
-            <table class="table table-hover" id="preferencesTable">
-                <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Title</th>
-                    <th>Semester</th>
-                </tr>
-                </thead>
-                <tbody class="table-group-divider">
-                {% for preference in preferences %}
-                    <tr>
-                        <td>{{ preference.course.code }}</td>
-                        <td>{{ preference.course.title }}</td>
-                        <td>{{ preference.course.quadri }}</td>
-                        <td></td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
     </div>
 {% endblock %}
 

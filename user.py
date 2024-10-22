@@ -137,11 +137,6 @@ def user_profile(user_id, ):
     researcher = db.session.query(Researcher).filter(Researcher.user_id == requested_user.id).first()
     current_user = requested_user.email == session["email"]
 
-    preferences = []
-    if researcher:
-        preferences = db.session.query(PreferenceAssignment).filter_by(researcher_id=researcher.id,
-                                                                       course_year=current_year).order_by(
-            PreferenceAssignment.rank).all()
     courses = []
     if current_user and requested_user.organization:
         courses = db.session.query(Course).filter(Course.year == current_year,
@@ -149,7 +144,7 @@ def user_profile(user_id, ):
                                                   ).all()
 
     return render_template('user_profile.html', requested_user=requested_user, supervisors=all_users,
-                           researcher=researcher, courses=courses, preferences=preferences, current_user=current_user,
+                           researcher=researcher, courses=courses, current_user=current_user,
                            current_year=current_year)
 
 
@@ -164,8 +159,10 @@ def delete_researcher(user_id):
 @login_required
 @check_access_level(Role.ADMIN, Role.RESEARCHER)
 def preferences(user_id, current_year):
-    if not is_allowed_user(user_id):
+    requested_user = db.session.query(User).filter_by(id=user_id).first()
+    if not is_allowed_user(user_id) or requested_user.researcher_profile is None:
         flash("Permission denied. You do not have access to this page.", "error")
+        return redirect(url_for("index"))
 
     researcher = db.session.query(Researcher).filter(Researcher.user_id == user_id).first()
     user = db.session.query(User).filter(User.id == session["user_id"]).first()

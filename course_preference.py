@@ -29,9 +29,9 @@ def save_preference():
     current_year = get_current_year()
 
     if data is None:
-        return make_response("No data received", 500)
+        flash("No data received", "error")
 
-    preferences = data['preferences']
+    preferences = data.get("preferences", None)
     if preferences is None:
         flash("No preferences received", "error")
 
@@ -42,10 +42,8 @@ def save_preference():
 
     delete_old_preferences(researcher.id, current_year)
 
-    rank = 0
-    for preference in preferences:
+    for rank, preference in enumerate(preferences):
         try:
-            rank += 1
             course_id = preference['course_id']
             course_year = preference['course_year']
             new_preference = PreferenceAssignment(rank=rank, course_id=course_id, course_year=course_year,
